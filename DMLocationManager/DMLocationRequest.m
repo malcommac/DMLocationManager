@@ -10,10 +10,10 @@
 #import "DMLocationRequest.h"
 #import "DMLocationManager.h"
 
-#define kDMLocManage_DefaultTimeout                     10.0f
+#define kDMLocManage_DefaultTimeout                     15.0f
 
 #define kDMLocManage_MinAccuracy_BestNavigation         60.0f
-#define kDMLocManage_MinAccuracy_TenMeters              100.0f
+#define kDMLocManage_MinAccuracy_TenMeters              120.0f
 #define kDMLocManage_MinAccuracy_HundredMeters          500.0f
 #define kDMLocManage_MinAccuracy_Kilometer              1000.0f
 #define kDMLocManage_MinAccuracy_3Kilometers            3000.0f
@@ -98,13 +98,14 @@
         if (locationCacheIsValid)
             currentLocation = [DMLocationManager shared].cachedLocation;
         
-        if (!locationCacheIsValid || ![self locationIsValidForAccuracy:self.accuracy]) {
+        BOOL locationIsAccurated = [self locationIsValidForAccuracy:self.accuracy];
+        if (!locationCacheIsValid || !locationIsAccurated) {
             locationManager = [[CLLocationManager alloc] init];
             [locationManager setDelegate:self];
             [locationManager startUpdatingLocation];
             timeoutTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout target:self selector:@selector(timeoutReached:) userInfo:nil repeats:NO];
         } else {
-            [self reverseCoordinates];
+            [self reverseLocation];
         }
     } else if (operationType == DMLocationRequestTypeReverseLocation) {
         [self reverseLocation];
@@ -120,6 +121,8 @@
 }
 
 - (void) cancelLocationSearch {
+    [timeoutTimer invalidate];
+    timeoutTimer = nil;
     [locationManager stopUpdatingLocation];
     [locationManager setDelegate:nil];
     locationManager = nil;
@@ -128,9 +131,12 @@
 - (void) timeoutReached:(id) sender {
     [self cancelLocationSearch];
     
-    NSError *timeoutError = [NSError errorWithDomain:NSLocalizedString(@"Error_Timeout", nil) code:0 userInfo:nil];
-    if (completitionHandler != nil)
-        completitionHandler(currentLocation,nil,timeoutError);
+    NSError *timeoutError = [NSError errorWithDomain:NSLocalizedStringFromTable(@"Error_Timeout", @"DMLocationManager", nil) code:0 userInfo:nil];
+    if (completitionHandler != nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completitionHandler(currentLocation,nil,timeoutError);
+        });
+    }
     [self finishOperationWithError:timeoutError];
 }
 
@@ -143,14 +149,19 @@
                                        queue:[[NSOperationQueue alloc] init]
                            completionHandler:^(NSURLResponse *response, NSData *data, NSError *dataError) {
                                if (dataError != nil || data.length == 0) {
-                                   coordFromAdrCompletitionHandler(nil,dataError);
+                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                       coordFromAdrCompletitionHandler(nil,dataError);
+                                   });
                                } else {
                                    NSError* jsonError = nil;
                                    NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&jsonError];
-                                   if (jsonError != nil)
-                                       coordFromAdrCompletitionHandler(nil,jsonError);
-                                   else
-                                       coordFromAdrCompletitionHandler([self locationFromGoogleResultDictionary:resultDict],nil);
+                                   
+                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                       if (jsonError != nil)
+                                           coordFromAdrCompletitionHandler(nil,jsonError);
+                                       else
+                                           coordFromAdrCompletitionHandler([self locationFromGoogleResultDictionary:resultDict],nil);
+                                   });
                                }
                            }];
 }
@@ -172,12 +183,17 @@
     [geocoder reverseGeocodeLocation:currentLocation
                    completionHandler:^(NSArray *cl_placemarks, NSError *cl_error) {
                        CLPlacemark* placemark = [cl_placemarks lastObject];
-                       if (completitionHandler != nil)
-                           completitionHandler(currentLocation,placemark,cl_error);
+                       if (completitionHandler != nil) {
+                           dispatch_async(dispatch_get_main_queue(), ^{
+                               completitionHandler(currentLocation,placemark,cl_error);
+                           });
+                       }
                        
-                       if (geocoderCompletitionHandler != nil)
-                           geocoderCompletitionHandler(placemark,[placemark.addressDictionary objectForKey:@"City"],[placemark.addressDictionary objectForKey:@"City"],cl_error);
-                           
+                       if (geocoderCompletitionHandler != nil) {
+                           dispatch_async(dispatch_get_main_queue(), ^{
+                               geocoderCompletitionHandler(placemark,[placemark.addressDictionary objectForKey:@"City"],[placemark.addressDictionary objectForKey:@"City"],cl_error);
+                           });
+                       }
                        [self finishOperationWithError:nil];
                    }];
 }
@@ -188,10 +204,13 @@
     
     currentLocation = newLocation;
     [DMLocationManager shared].cachedLocation = newLocation;
-     
-    if ([self locationIsValidForAccuracy:self.accuracy]) {
+    
+    BOOL isValidForAccuracy = [self locationIsValidForAccuracy:self.accuracy];
+    if (isValidForAccuracy) {
         if (!self.reverseCoordinates) {
-            completitionHandler(currentLocation,nil,nil);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completitionHandler(currentLocation,nil,nil);
+            });
             [self finishOperationWithError:nil];
         } else {
             [self cancelLocationSearch];
@@ -202,7 +221,11 @@
 
 - (void)locationManager:(CLLocationManager *)manager
        didFailWithError:(NSError *)error {
-    if (completitionHandler) completitionHandler(nil,nil,error);
+    if (completitionHandler) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completitionHandler(nil,nil,error);
+        });
+    }
     [self finishOperationWithError:error];
 }
 
