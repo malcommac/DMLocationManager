@@ -13,7 +13,7 @@ It requires iOS >= 5.
 DMLocationManager is a singleton class, so just call one of the available methods from [DMLocationManager shared] instance.
 
 How to obtain current user's location:
-```objective-c
+``` objective-c
     [[DMLocationManager shared] obtainCurrentLocationAndReverse:NO
                                                    withAccuracy:kCLLocationAccuracyHundredMeters
                                                        useCache:NO
@@ -23,7 +23,7 @@ How to obtain current user's location:
 
 How to obtain address's CLPlacemark object from CLLocation:
     
-```objective-c
+``` objective-c
 [[DMLocationManager shared] obtainAddressFromLocation:[[CLLocation alloc] initWithLatitude:41.90789 longitude:12.537514]
                                              completition:^(CLPlacemark *placemark, NSString *address,NSString *locality,NSError* error) {
                                              }];
@@ -31,10 +31,12 @@ How to obtain address's CLPlacemark object from CLLocation:
 
 How to obtain GPS coordinates from address NSString:
 
-```[[DMLocationManager shared] obtainCoordinatesFromAddress:@"Via Vassallo 23, Roma"
+``` objective-c
+[[DMLocationManager shared] obtainCoordinatesFromAddress:@"Via Vassallo 23, Roma"
                                                 completition:^(CLLocation *location, NSError *error) {
                                                 }];
 ```
+
 
 ## Donations
 
