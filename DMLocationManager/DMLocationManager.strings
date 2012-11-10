@@ -1,0 +1,11 @@
+/* 
+  Localizable.strings
+  DMLocationManagerExample
+
+  Created by Daniele Margutti (me@danielemargutti.com) on 11/10/12.
+  Copyright (c) 2012 http://www.danielemargutti.com. All rights reserved.
+  Distribuited under MIT License (http://opensource.org/licenses/MIT)
+*/
+
+"Error_LocationServicesDisabled"        =   "Location manager are disabled. Go to Setting > Privacy > Location Services and enable them.";
+"Error_Timeout"                         =   "Timeout reached";
