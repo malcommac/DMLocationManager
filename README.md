@@ -6,6 +6,8 @@ It's all block based and uses NSOperationQueue to optimize multiple requests.
 Daniele Margutti, <http://www.danielemargutti.com>
 <me@danielemargutti.com>
 
+It requires iOS >= 5.
+
 ## How to use it
 
 DMLocationManager is a singleton class, so just call one of the available methods from [DMLocationManager shared] instance.
