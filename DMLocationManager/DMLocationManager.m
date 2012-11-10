@@ -78,7 +78,7 @@
 }
 
 - (NSTimeInterval) cachedLocationAge {
-    if (cachedLocation == nil) return -1;
+    if (cachedLocation == nil) return NSUIntegerMax;
     return [[NSDate date] timeIntervalSinceDate:cachedLocation.timestamp];
 }
 
