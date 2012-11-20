@@ -163,6 +163,7 @@
                                            coordFromAdrCompletitionHandler([self locationFromGoogleResultDictionary:resultDict],nil);
                                    });
                                }
+                               [self finishOperationWithError:dataError];
                            }];
 }
 
