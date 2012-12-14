@@ -91,7 +91,7 @@
             (locationA.horizontalAccuracy <= locationB.horizontalAccuracy && locationA.verticalAccuracy <= locationB.verticalAccuracy));
 }
 
-- (BOOL) startMonitoringForSignificantLocationChanges:(DMLocationSignificantChangesHandler) updateBlock {
+- (BOOL) queueSignificantLocationChangesMonitor:(DMLocationSignificantChangesHandler) updateBlock {
     if (![CLLocationManager significantLocationChangeMonitoringAvailable] || updateBlock == nil)
         return NO;
     
@@ -106,7 +106,7 @@
     return YES;
 }
 
-- (void) stopMonitoringSignificantLocationChanges {
+- (void) stopMonitoringAllSignificantLocationChanges {
     [sigLocChangesObservers removeAllObjects];
     [sigLocChangesManager setDelegate:nil];
     [sigLocChangesManager stopMonitoringSignificantLocationChanges];

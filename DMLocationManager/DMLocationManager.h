@@ -42,9 +42,10 @@
                                         completition:(DMLocationRequestReverseAddressCoordinates) completition;
 
 // Receive only significant location changes (low power monitor)
-- (BOOL) startMonitoringForSignificantLocationChanges:(DMLocationSignificantChangesHandler) updateBlock;
+// Your updateBlock block will be added into the internal observer queue, so you can register one or more observers.
+- (BOOL) queueSignificantLocationChangesMonitor:(DMLocationSignificantChangesHandler) updateBlock;
 
 // Stop monitoring significant location changes (remove all block's observers)
-- (void) stopMonitoringSignificantLocationChanges;
+- (void) stopMonitoringAllSignificantLocationChanges;
 
 @end
