@@ -20,8 +20,9 @@ enum {
 
 // COMPLETITION HANDLERS
 typedef void(^DMLocationRequestHandler)(CLLocation *location, CLPlacemark *placemark, NSError *error);
-typedef void(^DMLocationRequestReverseGeoHandler)(CLPlacemark *placemark, NSString *address,NSString *locality,NSError *error);
+typedef void(^DMLocationRequestReverseGeoHandler)(CLPlacemark *placemark, NSString *address,NSString *locality,NSArray* otherPlacemarks,NSError *error);
 typedef void(^DMLocationRequestReverseAddressCoordinates)(CLLocation* location,NSError *error);
+typedef void(^DMLocationSignificantChangesHandler)(CLLocation* location,NSError *error, BOOL *stop);
 
 @interface DMLocationRequest : DMOperation {
     

@@ -11,9 +11,11 @@
 
 #define kDMLocationManagerMaxCacheLife          (60*2)      // 2 MINUTES CACHE LIFETIME
 
-@interface DMLocationManager() {
+@interface DMLocationManager() <CLLocationManagerDelegate> {
     NSOperationQueue*   networkQueue;
     CLLocation*         cachedLocation;
+    NSMutableArray*     sigLocChangesObservers;
+    CLLocationManager*  sigLocChangesManager;
 }
 
 @end
@@ -87,6 +89,57 @@
         return YES;
     return ([locationA.timestamp timeIntervalSinceNow] < [locationB.timestamp timeIntervalSinceNow] &&
             (locationA.horizontalAccuracy <= locationB.horizontalAccuracy && locationA.verticalAccuracy <= locationB.verticalAccuracy));
+}
+
+- (BOOL) startMonitoringForSignificantLocationChanges:(DMLocationSignificantChangesHandler) updateBlock {
+    if (![CLLocationManager significantLocationChangeMonitoringAvailable] || updateBlock == nil)
+        return NO;
+    
+    if (sigLocChangesObservers == nil) {
+        sigLocChangesObservers = [[NSMutableArray alloc] init];
+        sigLocChangesManager = [[CLLocationManager alloc] init];
+        [sigLocChangesManager setDelegate:self];
+    }
+    [sigLocChangesObservers addObject:[updateBlock copy]];
+    [sigLocChangesManager startMonitoringSignificantLocationChanges];
+    
+    return YES;
+}
+
+- (void) stopMonitoringSignificantLocationChanges {
+    [sigLocChangesObservers removeAllObjects];
+    [sigLocChangesManager setDelegate:nil];
+    [sigLocChangesManager stopMonitoringSignificantLocationChanges];
+    sigLocChangesManager = nil;
+}
+
+- (void)locationManager:(CLLocationManager *)manager
+	didUpdateToLocation:(CLLocation *)newLocation
+		   fromLocation:(CLLocation *)oldLocation {
+    
+    NSMutableIndexSet *unsubscribedObservers = [[NSMutableIndexSet alloc] init];
+    __block BOOL needStopObservingMe = NO;
+    [sigLocChangesObservers enumerateObjectsUsingBlock:^(DMLocationSignificantChangesHandler observer, NSUInteger idx, BOOL *stop) {
+        observer(newLocation,nil,&needStopObservingMe);
+        
+        if (needStopObservingMe)
+            [unsubscribedObservers addIndex:idx];
+    }];
+    [sigLocChangesObservers removeObjectsAtIndexes:unsubscribedObservers];
+    if (sigLocChangesObservers.count == 0) [self stopMonitoringSignificantLocationChanges];
+}
+
+- (void)locationManager:(CLLocationManager *)manager
+       didFailWithError:(NSError *)error {
+    
+    NSMutableIndexSet *unsubscribedObservers = [[NSMutableIndexSet alloc] init];
+    [sigLocChangesObservers enumerateObjectsUsingBlock:^(DMLocationSignificantChangesHandler observer, NSUInteger idx, BOOL *stop) {
+        if (!stop)
+            observer(nil,error,NO);
+        else [unsubscribedObservers addIndex:idx];
+    }];
+    [sigLocChangesObservers removeObjectsAtIndexes:unsubscribedObservers];
+    if (sigLocChangesObservers.count == 0) [self stopMonitoringSignificantLocationChanges];
 }
 
 @end

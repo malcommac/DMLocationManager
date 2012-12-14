@@ -41,4 +41,10 @@
 - (DMLocationRequest *) obtainCoordinatesFromAddress:(NSString *) address
                                         completition:(DMLocationRequestReverseAddressCoordinates) completition;
 
+// Receive only significant location changes (low power monitor)
+- (BOOL) startMonitoringForSignificantLocationChanges:(DMLocationSignificantChangesHandler) updateBlock;
+
+// Stop monitoring significant location changes (remove all block's observers)
+- (void) stopMonitoringSignificantLocationChanges;
+
 @end
