@@ -126,7 +126,7 @@
             [unsubscribedObservers addIndex:idx];
     }];
     [sigLocChangesObservers removeObjectsAtIndexes:unsubscribedObservers];
-    if (sigLocChangesObservers.count == 0) [self stopMonitoringSignificantLocationChanges];
+    if (sigLocChangesObservers.count == 0) [self stopMonitoringAllSignificantLocationChanges];
 }
 
 - (void)locationManager:(CLLocationManager *)manager
@@ -139,7 +139,7 @@
         else [unsubscribedObservers addIndex:idx];
     }];
     [sigLocChangesObservers removeObjectsAtIndexes:unsubscribedObservers];
-    if (sigLocChangesObservers.count == 0) [self stopMonitoringSignificantLocationChanges];
+    if (sigLocChangesObservers.count == 0) [self stopMonitoringAllSignificantLocationChanges];
 }
 
 @end
