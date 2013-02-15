@@ -192,7 +192,11 @@
                        
                        if (geocoderCompletitionHandler != nil) {
                            dispatch_async(dispatch_get_main_queue(), ^{
-                               geocoderCompletitionHandler(placemark,[placemark.addressDictionary objectForKey:@"City"],[placemark.addressDictionary objectForKey:@"City"],cl_error);
+                               geocoderCompletitionHandler(placemark,
+														   [placemark.addressDictionary objectForKey:@"City"],
+														   [placemark.addressDictionary objectForKey:@"City"],
+														   nil,
+														   cl_error);
                            });
                        }
                        [self finishOperationWithError:nil];

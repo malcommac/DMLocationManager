@@ -44,7 +44,7 @@
                                                    }];
     
     [[DMLocationManager shared] obtainAddressFromLocation:[[CLLocation alloc] initWithLatitude:41.90789 longitude:12.537514]
-                                             completition:^(CLPlacemark *placemark, NSString *address,NSString *locality,NSError* error) {
+                                             completition:^(CLPlacemark *placemark, NSString *address,NSString *locality,NSArray *otherPlacemarks,NSError* error) {
                                                  if (error != nil)
                                                      NSLog(@"Address from location error: %@",error);
                                                  else 

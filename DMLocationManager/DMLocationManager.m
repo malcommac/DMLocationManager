@@ -52,7 +52,7 @@
                                            withAccuracy:(CLLocationAccuracy) accuracy
                                                useCache:(BOOL) useCachedLocationIfAvailable
                                            completition:(DMLocationRequestHandler) completition {
-    DMLocationRequest *request = [DMLocationRequest currentLocation:YES
+    DMLocationRequest *request = [DMLocationRequest currentLocation:reverseGeocoder
                                                            accuracy:accuracy
                                                        completition:completition];
     request.useCachedLocation = useCachedLocationIfAvailable;
